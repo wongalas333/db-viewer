@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>DB Viewer - Quizoner</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>body{font-family:system-ui;margin:0;background:#0f172a;color:#e2e8f0}header{background:#1e293b;padding:1rem 2rem}main{padding:2rem;max-width:1100px;margin:0 auto}.card{background:#1e293b;padding:1.5rem;border-radius:12px;margin-bottom:1rem}table{width:100%;border-collapse:collapse}th,td{padding:.6rem;border-bottom:1px solid #334155;text-align:left}canvas{max-height:300px}</style></head>
+<body><header><h1>📊 Database Viewer — Quizoner</h1></header><main>
+<div class="card"><h2>Visualisasi Masukan per Hari</h2><canvas id="chart"></canvas></div>
+<div class="card"><h2>Daftar Masukan</h2><table><thead><tr><th>ID</th><th>Nama</th><th>Masukan</th><th>Waktu</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<script>
+let chart;
+async function load(){
+  const r=await fetch('/api/feedback');const d=await r.json();const rows=d.data||[];
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=rows.map(x=>`<tr><td>${x.id}</td><td>${x.nama||''}</td><td>${x.masukan||''}</td><td>${new Date(x.created_at).toLocaleString()}</td></tr>`).join('');
+  const counts={};
+  rows.forEach(x=>{const day=new Date(x.created_at).toLocaleDateString();counts[day]=(counts[day]||0)+1;});
+  const labels=Object.keys(counts);const data=Object.values(counts);
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById('chart'),{type:'bar',data:{labels,datasets:[{label:'Jumlah Masukan',data,backgroundColor:'#2563eb'}]},options:{responsive:true}});
+}
+load();
+</script></body></html>
